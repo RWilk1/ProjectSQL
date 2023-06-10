@@ -36,3 +36,7 @@ cursor.execute("SELECT * FROM users")
 for id, name, age in cursor:
     print(id, name, age)
 
+# Zamykanie połączenia i kursora
+print(cursor.connection)
+cursor.close()
+connection.close()
