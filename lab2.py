@@ -5,7 +5,7 @@ import pyodbc
 
 load_dotenv()
 database_password = os.environ.get("DATABASE_PASSWORD")
-print(database_password)
+# print(database_password)
 database_server = 'morfeusz.wszib.edu.pl'
 driver = "ODBC Driver 18 for SQL Server"
 database_user = 'rawilk'
@@ -21,13 +21,25 @@ connection_string = f'Driver={driver};' \
 connection = pyodbc.connect(connection_string)
 # these all undermentioned statemants are the start of transaction
 # wszystkie zapytania, które modyfikukja dane to otwarcie nowej transakcji
-# connection.execute("CREATE TABLE IF NOT EXISTS users (id int identity, name varchar(100), age int)")
+cursor = connection.cursor()
+
+# connection.execute("DROP TABLE users")
+# connection.execute("CREATE TABLE users (id int identity, name varchar(100), age int)")
 connection.execute("INSERT INTO users (name, age) VALUES('Rafal',20), ('Iza', 30)")
 
-# Obiekt kursor, sluzy do obslugiwania baz danych, jest to obiekt ktory iteruje tabele danych linia po lini
-# Ten kursor dziala po stronie servera, a nie klienta
-cursor = connection.cursor()
-cursor.execute("SELECT * FROM users")
+# Commitowanie transakcji
+cursor.commit()
+
+# Otwarcie nowej transakcji bez commitowania
+connection.execute("INSERT INTO users (name, age) VALUES('x',20)")
+
+for row in cursor.execute("SELECT * FROM users"):
+    print(row)
+
+
+
+
+# cursor.execute("SELECT * FROM users")
 # results = cursor.fetchall()
 # results2 = cursor.fetchone()
 # results3 = cursor.fetchmany(1)
@@ -40,14 +52,14 @@ cursor.execute("SELECT * FROM users")
 #     print(row)
 # for id, name, age in cursor:
 #     print(id, name, age)
-for row in cursor.execute("SELECT * FROM users"):
-    print(row)
-
-# Zamykanie połączenia i kursora
-print(cursor.connection)
-
-cursor.execute("SELECT * FROM users")
-# for row in results3:
+# for row in cursor.execute("SELECT * FROM users"):
 #     print(row)
+#
+# # Zamykanie połączenia i kursora
+# print(cursor.connection)
+#
+# cursor.execute("SELECT * FROM users")
+# # for row in results3:
+# #     print(row)
 cursor.close()
 connection.close()
