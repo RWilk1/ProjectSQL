@@ -22,3 +22,17 @@ connection_string = f'Driver={driver};' \
                     f'PWD={database_password};' \
                     'Encrypt=no;'
 connection = pyodbc.connect(connection_string)
+connection.execute("CREATE TABLE users (id int identity, name varchar(100), age int)")
+connection.execute("INSERT INTO users (name, age) VALUES('Rafal',20), ('Iza', 30)")
+
+# Obiekt kursor, sluzy do obslugiwania baz danych, jest to obiekt ktory iteruje tabele danych linia po lini
+# Ten kursor dziala po stronie servera, a nie klienta
+cursor = connection.cursor()
+cursor.execute("SELECT * FROM users")
+
+# typ danych krotka
+# for row in cursor:
+#     print(row)
+for id, name, age in cursor:
+    print(id, name, age)
+
