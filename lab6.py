@@ -53,34 +53,60 @@ class Account:
             self.name = name
             self._balance = open_balance
             print(f"Account {name} was created with open balance {round(open_balance,2)}, id={self.id}")
-    def deposit(self, amount: float):
-        if amount > 0:
-            with connection.cursor() as cursor:
-                self._balance += amount
-                cursor.execute("UPDATE accounts SET account_balance = ? WHERE Acc_id = ?", (self._balance, self.id))
-                cursor.execute("INSERT INTO transactions (account_id, transaction_time, amount) VALUES (?,?,?)", (self.id, Account.current_time(), amount))
-                print(f"amount {amount} deposit to account {self.name}")
-    def withdraw(self, amount: float):
-        if 0 < amount <= self._balance:
-            with connection.cursor() as cursor:
-                self._balance -= amount
-                cursor.execute("UPDATE accounts SET account_balance = ? WHERE Acc_id = ?", (self._balance, self.id))
-                cursor.execute("INSERT INTO transactions (account_id, transaction_time, amount) VALUES (?,?,?)",(self.id, Account.current_time(), amount))
-                print(f"{amount} withraw from account {self.name}")
+    def deposit(self, amount: float, commit=True):
+        if amount < 0:
+            raise ValueError("Wrong amount to deposit")
+            cursor = connection.cursor()
+        try:
+            # with connection.cursor() as cursor:
+
+            self._balance += amount
+            cursor.execute("UPDATE accounts SET account_balance = ? WHERE Acc_id = ?", (self._balance, self.id))
+            cursor.execute("INSERT INTO transactions (account_id, transaction_time, amount) VALUES (?,?,?)", (self.id, Account.current_time(), amount))
+            print(f"amount {amount} deposit to account {self.name}")
+        if commit=True:
+
+            cursor.commit()
+    def withdraw(self, amount: float, commit=True):
+        if amount < 0 or amount > self._balance:
+            raise ValueError("Wrong amount to withdraw")
+        cursor = connection.cursor()
+        try:
+            # with connection.cursor() as cursor:
+            self._balance -= amount
+            cursor.execute("UPDATE accounts SET account_balance = ? WHERE Acc_id = ?", (self._balance, self.id))
+            cursor.execute("INSERT INTO transactions (account_id, transaction_time, amount) VALUES (?,?,?)",(self.id, Account.current_time(), amount))
+            print(f"{amount} withraw from account {self.name}")
+            if commit:
+                cursor.commit()
+        except Exception:
+            cursor.commit()
     def show_balance(self):
         print(f"Account {self.name} balance: {self._balance}")
 
 
 
+# Metoda "ogolnodostepna"
+def do_transaction(account_from: Account, account_to: Account, amount: float):
+    if  account._balance >= amount:
+        account_from.withdraw(amount)
+        account_to.deposit(amount)
+    else:
+        exit()
+
+
 
 if __name__ == '__main__':
-    account = Account('Andrzej')
-    account.deposit(10)
-    account.deposit(0.1)
-    account.deposit(0.3)
-    account.deposit(7.2)
-    account.withdraw(7.2)
-    account.show_balance()
+    account = Account('Andrzej', 100)
+    account2 = Account('Maciej', 50)
+    do_transaction(account2, account, amount=51)
+
+    # account.deposit(10)
+    # account.deposit(0.1)
+    # account.deposit(0.3)
+    # account.deposit(7.2)
+    # account.withdraw(7.2)
+    # account.show_balance()
 
 
 
